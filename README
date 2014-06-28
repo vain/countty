@@ -9,13 +9,15 @@ POSIX OS and a VT-ish color terminal.
 
 Usage:
 
-    countty [-t <timestamp> [-b]]
+    countty [-t <timestamp> [-b <n>]]
 
         No options make countty count upwards.
 
         "-t <timestamp>" creates a countdown that ends at the specified time.
 
-        "-b" makes the screen blink in red once the countdown has finished.
+        "-b <n>" makes the screen blink n seconds in red once the countdown has
+        finished. If n is -1, the screen will blink about 4 * INT_MAX seconds
+        (i.e., "forever").
 
     You should combine countty with GNU date:
 

@@ -89,12 +89,12 @@ full_color(int *blink)
 
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 	fputs("\033[H", stdout);
-	fputs(*blink == 1 ? "\033[7;1;31m" : "\033[0m", stdout);
+	fputs(*blink % 2 ? "\033[0m" : "\033[7;1;31m", stdout);
 	for (y = 0; y < w.ws_row; y++)
 		for (x = 0; x < w.ws_col; x++)
 			putchar(' ');
 	fflush(stdout);
-	*blink = *blink == 1 ? 2 : 1;
+	(*blink)--;
 }
 
 void
@@ -222,12 +222,12 @@ main(int argc, char **argv)
 	signal(SIGINT, restore_cursor_and_quit);
 	fputs("\033[?25l", stdout);
 
-	while ((opt = getopt(argc, argv, "bt:")) != -1)
+	while ((opt = getopt(argc, argv, "b:t:")) != -1)
 	{
 		switch (opt)
 		{
 			case 'b':
-				blink = 1;
+				blink = 2 * atoi(optarg);
 				break;
 			case 't':
 				target = atol(optarg);
