@@ -19,11 +19,12 @@ Usage:
         finished. If n is -1, the screen will blink about 4 * INT_MAX seconds
         (i.e., "forever").
 
-    You should combine countty with GNU date:
+    You should combine countty with GNU date, figlet or other tools:
 
         countty -t $(date -d '2014-12-24 20:00' +%s)
         countty -t $(date -d 'now + 10 seconds' +%s)
         countty -t $(date -d 'tomorrow 12:00' +%s)
+        countty -t $(date -d '...' +%s); clear; figlet -tc <<<'PARTY'
 
 
 [1] https://github.com/trehn/termdown
