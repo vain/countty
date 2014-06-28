@@ -8,7 +8,7 @@
 #include <unistd.h>
 
 
-static int countdown(long int);
+static int countdown(long int, int);
 static void countup(long int *, long int *);
 static void full_color(int *);
 static void render_duration(long int, int);
@@ -42,7 +42,7 @@ static unsigned char font[][FONT_CHARACTERS] = {
 
 
 int
-countdown(long int target)
+countdown(long int target, int critical)
 {
 	struct timeval tv;
 	long int diff;
@@ -57,7 +57,7 @@ countdown(long int target)
 	if (diff <= 0)
 		return 1;
 
-	render_duration(diff, 1);
+	render_duration(diff, critical);
 	return 0;
 }
 
@@ -78,7 +78,7 @@ countup(long int *ref, long int *sync_fraction)
 	if (*sync_fraction == 0)
 		*sync_fraction = tv.tv_usec * 1e3;
 
-	render_duration(tv.tv_sec - *ref, 0);
+	render_duration(tv.tv_sec - *ref, -1);
 }
 
 void
@@ -137,7 +137,7 @@ render_duration(long int s, int critical)
 		for (i = 0; i < pad_x; i++)
 			putchar(' ');
 		for (p = buf; *p; p++)
-			if (s <= 10 && critical)
+			if (critical > 0 && s <= critical)
 				render_glyph_row(*p, y, ";1;31");
 			else
 				render_glyph_row(*p, y, "");
@@ -216,18 +216,21 @@ main(int argc, char **argv)
 	long int target = 0;
 	long int start = 0;
 	long int sync_fraction = 0;
-	int blink = 0, opt;
+	int critical = 10, blink = 0, opt;
 
 	atexit(restore_cursor);
 	signal(SIGINT, restore_cursor_and_quit);
 	fputs("\033[?25l", stdout);
 
-	while ((opt = getopt(argc, argv, "b:t:")) != -1)
+	while ((opt = getopt(argc, argv, "b:c:t:")) != -1)
 	{
 		switch (opt)
 		{
 			case 'b':
 				blink = 2 * atoi(optarg);
+				break;
+			case 'c':
+				critical = atoi(optarg);
 				break;
 			case 't':
 				target = atol(optarg);
@@ -241,7 +244,7 @@ main(int argc, char **argv)
 	{
 		if (target != 0)
 		{
-			if (countdown(target))
+			if (countdown(target, critical))
 			{
 				if (blink == 0)
 					exit(EXIT_SUCCESS);

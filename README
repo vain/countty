@@ -9,7 +9,7 @@ POSIX OS and a VT-ish color terminal.
 
 Usage:
 
-    countty [-t <timestamp> [-b <n>]]
+    countty [-t <timestamp> [-b <n>] [-c <s>]]
 
         No options make countty count upwards.
 
@@ -18,6 +18,9 @@ Usage:
         "-b <n>" makes the screen blink n seconds in red once the countdown has
         finished. If n is -1, the screen will blink about 4 * INT_MAX seconds
         (i.e., "forever").
+
+        With "-c <s>", when the countdown reaches the last s seconds, the
+        display will turn red. Defaults to 10 seconds.
 
     You should combine countty with GNU date, figlet or other tools:
 
