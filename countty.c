@@ -1,0 +1,258 @@
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <sys/time.h>
+#include <time.h>
+#include <unistd.h>
+
+
+static int countdown(long int);
+static void countup(long int *, long int *);
+static void full_color(int *);
+static void render_duration(long int, int);
+static void render_glyph(char, char *, int);
+static void restore_cursor(void);
+static void restore_cursor_and_quit(int);
+static void wait_for_next_second(long int);
+
+
+#define FONT_HEIGHT 7
+#define FONT_WIDTH 8
+#define FONT_CHARACTERS 13
+
+static unsigned char font[][FONT_CHARACTERS] = {
+	/* Line by line, top to bottom, least significant bit is the
+	 * right-most character: 0x3D = 0b00111101 = "  xxxx x". */
+	{ '0', 0x3C, 0xC3, 0xC3, 0x00, 0xC3, 0xC3, 0x3C },
+	{ '1', 0x00, 0x03, 0x03, 0x00, 0x03, 0x03, 0x00 },
+	{ '2', 0x3C, 0x03, 0x03, 0x3C, 0xC0, 0xC0, 0x3C },
+	{ '3', 0x3C, 0x03, 0x03, 0x3C, 0x03, 0x03, 0x3C },
+	{ '4', 0x00, 0xC3, 0xC3, 0x3C, 0x03, 0x03, 0x00 },
+	{ '5', 0x3C, 0xC0, 0xC0, 0x3C, 0x03, 0x03, 0x3C },
+	{ '6', 0x3C, 0xC0, 0xC0, 0x3C, 0xC3, 0xC3, 0x3C },
+	{ '7', 0x3C, 0xC3, 0xC3, 0x00, 0x03, 0x03, 0x00 },
+	{ '8', 0x3C, 0xC3, 0xC3, 0x3C, 0xC3, 0xC3, 0x3C },
+	{ '9', 0x3C, 0xC3, 0xC3, 0x3C, 0x03, 0x03, 0x3C },
+	{ 'd', 0x00, 0x03, 0x03, 0x3C, 0xC3, 0xC3, 0x3C },
+	{ ':', 0x00, 0x00, 0x18, 0x00, 0x18, 0x00, 0x00 },
+	{ ' ', 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
+};
+
+
+int
+countdown(long int target)
+{
+	struct timeval tv;
+	long int diff;
+
+	if (gettimeofday(&tv, NULL) == -1)
+	{
+		perror("gettimeofday");
+		exit(EXIT_FAILURE);
+	}
+
+	diff = target - tv.tv_sec;
+	if (diff <= 0)
+		return 1;
+
+	render_duration(diff, 1);
+	return 0;
+}
+
+void
+countup(long int *ref, long int *sync_fraction)
+{
+	struct timeval tv;
+
+	if (gettimeofday(&tv, NULL) == -1)
+	{
+		perror("gettimeofday");
+		exit(EXIT_FAILURE);
+	}
+
+	if (*ref == 0)
+		*ref = tv.tv_sec;
+
+	if (*sync_fraction == 0)
+		*sync_fraction = tv.tv_usec * 1e3;
+
+	render_duration(tv.tv_sec - *ref, 0);
+}
+
+void
+full_color(int *blink)
+{
+	int x, y;
+	struct winsize w;
+
+	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+	fputs("\033[H", stdout);
+	fputs(*blink == 1 ? "\033[7;1;31m" : "\033[0m", stdout);
+	for (y = 0; y < w.ws_row; y++)
+		for (x = 0; x < w.ws_col; x++)
+			putchar(' ');
+	fflush(stdout);
+	*blink = *blink == 1 ? 2 : 1;
+}
+
+void
+render_duration(long int s, int critical)
+{
+	long int sm = s;
+	int i, y, days, hours, minutes, seconds;
+	int pad_x, pad_y, rest_x, rest_y;
+	char buf[32] = "", *p;
+	struct winsize w;
+
+	days = sm / 86400;
+	sm %= 86400;
+	hours = sm / 3600;
+	sm %= 3600;
+	minutes = sm / 60;
+	seconds = sm % 60;
+
+	if (days > 0)
+		snprintf(buf, 32, "%dd %02d:%02d:%02d", days, hours, minutes, seconds);
+	else if (hours > 0)
+		snprintf(buf, 32, "%02d:%02d:%02d", hours, minutes, seconds);
+	else if (minutes > 0)
+		snprintf(buf, 32, "%02d:%02d", minutes, seconds);
+	else
+		snprintf(buf, 32, "%02d", seconds);
+
+	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+	pad_x = ((int)w.ws_col - (int)strlen(buf) * (1 + FONT_WIDTH + 1)) / 2;
+	rest_x = (int)w.ws_col - pad_x - (int)strlen(buf) * (1 + FONT_WIDTH + 1);
+	pad_y = ((int)w.ws_row - FONT_HEIGHT) / 2;
+	rest_y = (int)w.ws_row - pad_y - FONT_HEIGHT;
+
+	fputs("\033[H", stdout);
+	for (y = 0; y < pad_y; y++)
+		for (i = 0; i < w.ws_col; i++)
+			putchar(' ');
+	for (y = 0; y < FONT_HEIGHT; y++)
+	{
+		for (i = 0; i < pad_x; i++)
+			putchar(' ');
+		for (p = buf; *p; p++)
+			if (s <= 10 && critical)
+				render_glyph(*p, ";1;31", y);
+			else
+				render_glyph(*p, "", y);
+		for (i = 0; i < rest_x; i++)
+			putchar(' ');
+	}
+	for (y = 0; y < rest_y; y++)
+		for (i = 0; i < w.ws_col; i++)
+			putchar(' ');
+	fflush(stdout);
+}
+
+void
+render_glyph(char c, char *attrs, int line)
+{
+	int i;
+	unsigned char l = 0;
+
+	if (line >= FONT_HEIGHT)
+	{
+		fprintf(stderr, "Error: line >= FONT_HEIGHT\n");
+		exit(EXIT_FAILURE);
+	}
+
+	for (i = 0; i < FONT_CHARACTERS && font[i][0] != c; i++);
+	l = font[i][line + 1];
+
+	putchar(' ');
+	for (i = FONT_HEIGHT; i >= 0; i--)
+		if (l & (1 << i))
+			fprintf(stdout, "\033[7%sm \033[0m", attrs);
+		else
+			putchar(' ');
+	putchar(' ');
+}
+
+void
+restore_cursor(void)
+{
+	fputs("\033[?25h", stdout);
+}
+
+void
+restore_cursor_and_quit(int sig)
+{
+	restore_cursor();
+	putchar('\n');
+	exit(EXIT_SUCCESS);
+}
+
+void
+wait_for_next_second(long int sync_fraction)
+{
+	struct timeval tv;
+	struct timespec ts;
+
+	if (gettimeofday(&tv, NULL) == -1)
+	{
+		perror("gettimeofday");
+		exit(EXIT_FAILURE);
+	}
+
+	ts.tv_sec = 0;
+	ts.tv_nsec = 1e9 - tv.tv_usec * 1e3 + sync_fraction;
+	if (ts.tv_nsec >= 1e9)
+	{
+		ts.tv_sec = 1;
+		ts.tv_nsec -= 1e9;
+	}
+	nanosleep(&ts, NULL);
+}
+
+int
+main(int argc, char **argv)
+{
+	long int target = 0;
+	long int start = 0;
+	long int sync_fraction = 0;
+	int blink = 0, opt;
+
+	atexit(restore_cursor);
+	signal(SIGINT, restore_cursor_and_quit);
+	fputs("\033[?25l", stdout);
+
+	while ((opt = getopt(argc, argv, "bt:")) != -1)
+	{
+		switch (opt)
+		{
+			case 'b':
+				blink = 1;
+				break;
+			case 't':
+				target = atol(optarg);
+				break;
+			default:
+				exit(EXIT_FAILURE);
+		}
+	}
+
+	while (1)
+	{
+		if (target != 0)
+		{
+			if (countdown(target))
+			{
+				if (blink == 0)
+					exit(EXIT_SUCCESS);
+				else
+					full_color(&blink);
+			}
+		}
+		else
+			countup(&start, &sync_fraction);
+		wait_for_next_second(sync_fraction);
+	}
+
+	/* not reached */
+}
