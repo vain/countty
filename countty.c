@@ -12,7 +12,7 @@ static int countdown(long int);
 static void countup(long int *, long int *);
 static void full_color(int *);
 static void render_duration(long int, int);
-static void render_glyph(char, char *, int);
+static void render_glyph_row(char, int, char *);
 static void restore_cursor(void);
 static void restore_cursor_and_quit(int);
 static void wait_for_next_second(long int);
@@ -138,9 +138,9 @@ render_duration(long int s, int critical)
 			putchar(' ');
 		for (p = buf; *p; p++)
 			if (s <= 10 && critical)
-				render_glyph(*p, ";1;31", y);
+				render_glyph_row(*p, y, ";1;31");
 			else
-				render_glyph(*p, "", y);
+				render_glyph_row(*p, y, "");
 		for (i = 0; i < rest_x; i++)
 			putchar(' ');
 	}
@@ -151,23 +151,23 @@ render_duration(long int s, int critical)
 }
 
 void
-render_glyph(char c, char *attrs, int line)
+render_glyph_row(char c, int row, char *attrs)
 {
 	int i;
-	unsigned char l = 0;
+	unsigned char stripe = 0;
 
-	if (line >= FONT_HEIGHT)
+	if (row >= FONT_HEIGHT)
 	{
-		fprintf(stderr, "Error: line >= FONT_HEIGHT\n");
+		fprintf(stderr, "Error: row >= FONT_HEIGHT\n");
 		exit(EXIT_FAILURE);
 	}
 
 	for (i = 0; i < FONT_CHARACTERS && font[i][0] != c; i++);
-	l = font[i][line + 1];
+	stripe = font[i][row + 1];
 
 	putchar(' ');
-	for (i = FONT_HEIGHT; i >= 0; i--)
-		if (l & (1 << i))
+	for (i = FONT_WIDTH - 1; i >= 0; i--)
+		if (stripe & (1 << i))
 			fprintf(stdout, "\033[7%sm \033[0m", attrs);
 		else
 			putchar(' ');
