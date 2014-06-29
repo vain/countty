@@ -167,7 +167,7 @@ render_glyph_row(char c, int row, char *attrs)
 
 	for (i = FONT_WIDTH - 1; i >= 0; i--)
 		if (stripe & (1 << i))
-			fprintf(stdout, "\033[7%sm \033[0m", attrs);
+			printf("\033[7%sm \033[0m", attrs);
 		else
 			putchar(' ');
 }
