@@ -128,7 +128,7 @@ render_duration(long int s, int critical)
 	else
 		snprintf(buf, 32, "%02d\n", seconds);
 
-	render_lines(buf, (critical > 0 && s <= critical ? ";1;31" : ""));
+	render_lines(buf, (critical > 0 && s <= critical ? "7;1;31" : "7"));
 }
 
 void
@@ -153,23 +153,22 @@ render_lines(char *buf, char *attrs)
 			putchar(' ');
 	for (line = 0, line_p = buf; line < num_lines; line++, line_p = ++p)
 	{
-		for (cur_line_len = 0, p = line_p; *p && *p != '\n'; p++, cur_line_len++);
+		for (cur_line_len = 0, p = line_p; *p != '\n'; p++, cur_line_len++);
+		pad_x = (w.ws_col - cur_line_len * FONT_WIDTH) / 2;
+		rest_x = w.ws_col - pad_x - cur_line_len * FONT_WIDTH;
 
 		for (y = 0; y < FONT_HEIGHT; y++)
 		{
-			pad_x = (w.ws_col - cur_line_len * FONT_WIDTH) / 2;
-			rest_x = w.ws_col - pad_x - cur_line_len * FONT_WIDTH;
-
 			for (x = 0; x < pad_x; x++)
 				putchar(' ');
-			for (p = line_p; *p && *p != '\n'; p++)
+			for (p = line_p; *p != '\n'; p++)
 			{
 				for (i = 0; i < FONT_CHARACTERS && font[i][0] != *p; i++);
 				stripe = (i == FONT_CHARACTERS ? 0xFF : font[i][y + 1]);
 
 				for (i = FONT_WIDTH - 1; i >= 0; i--)
 					if (stripe & (1 << i))
-						printf("\033[7%sm \033[0m", attrs);
+						printf("\033[%sm \033[0m", attrs);
 					else
 						putchar(' ');
 			}
