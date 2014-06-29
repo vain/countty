@@ -13,10 +13,13 @@ static void countup(long int *, long int *);
 static void full_color(int *);
 static void render_duration(long int, int);
 static void render_glyph_row(char, int, char *);
+static void render_lines(char *, char *);
 static void restore_cursor(void);
 static void restore_cursor_and_quit(int);
 static void wait_for_next_second(long int);
 
+
+#define LINE_SPACING 2
 
 #define FONT_HEIGHT 7
 #define FONT_WIDTH 8
@@ -101,10 +104,8 @@ void
 render_duration(long int s, int critical)
 {
 	long int sm = s;
-	int i, y, days, hours, minutes, seconds;
-	int pad_x, pad_y, rest_x, rest_y;
-	char buf[32] = "", *p;
-	struct winsize w;
+	int days, hours, minutes, seconds;
+	char buf[32] = "";
 
 	days = sm / 86400;
 	sm %= 86400;
@@ -114,40 +115,15 @@ render_duration(long int s, int critical)
 	seconds = sm % 60;
 
 	if (days > 0)
-		snprintf(buf, 32, "%dd %02d:%02d:%02d", days, hours, minutes, seconds);
+		snprintf(buf, 32, "%dd\n%02d:%02d:%02d\n", days, hours, minutes, seconds);
 	else if (hours > 0)
-		snprintf(buf, 32, "%02d:%02d:%02d", hours, minutes, seconds);
+		snprintf(buf, 32, "%02d:%02d:%02d\n", hours, minutes, seconds);
 	else if (minutes > 0)
-		snprintf(buf, 32, "%02d:%02d", minutes, seconds);
+		snprintf(buf, 32, "%02d:%02d\n", minutes, seconds);
 	else
-		snprintf(buf, 32, "%02d", seconds);
+		snprintf(buf, 32, "%02d\n", seconds);
 
-	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-	pad_x = ((int)w.ws_col - (int)strlen(buf) * FONT_WIDTH) / 2;
-	rest_x = (int)w.ws_col - pad_x - (int)strlen(buf) * FONT_WIDTH;
-	pad_y = ((int)w.ws_row - FONT_HEIGHT) / 2;
-	rest_y = (int)w.ws_row - pad_y - FONT_HEIGHT;
-
-	fputs("\033[H", stdout);
-	for (y = 0; y < pad_y; y++)
-		for (i = 0; i < w.ws_col; i++)
-			putchar(' ');
-	for (y = 0; y < FONT_HEIGHT; y++)
-	{
-		for (i = 0; i < pad_x; i++)
-			putchar(' ');
-		for (p = buf; *p; p++)
-			if (critical > 0 && s <= critical)
-				render_glyph_row(*p, y, ";1;31");
-			else
-				render_glyph_row(*p, y, "");
-		for (i = 0; i < rest_x; i++)
-			putchar(' ');
-	}
-	for (y = 0; y < rest_y; y++)
-		for (i = 0; i < w.ws_col; i++)
-			putchar(' ');
-	fflush(stdout);
+	render_lines(buf, (critical > 0 && s <= critical ? ";1;31" : ""));
 }
 
 void
@@ -170,6 +146,51 @@ render_glyph_row(char c, int row, char *attrs)
 			printf("\033[7%sm \033[0m", attrs);
 		else
 			putchar(' ');
+}
+
+void
+render_lines(char *buf, char *attrs)
+{
+	struct winsize w;
+	int line, cur_line_len, x, y, pad_x, pad_y, rest_x, rest_y, num_lines;
+	char *p, *line_p;
+
+	for (num_lines = 0, p = buf; *p; p++)
+		if (*p == '\n')
+			num_lines++;
+
+	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+	pad_y = ((int)w.ws_row - (FONT_HEIGHT + LINE_SPACING) * num_lines) / 2;
+	rest_y = (int)w.ws_row - pad_y - (FONT_HEIGHT + LINE_SPACING) * num_lines;
+
+	fputs("\033[H", stdout);
+	for (y = 0; y < pad_y; y++)
+		for (x = 0; x < w.ws_col; x++)
+			putchar(' ');
+	for (line = 0, line_p = buf; line < num_lines; line++, line_p = ++p)
+	{
+		for (cur_line_len = 0, p = line_p; *p && *p != '\n'; p++, cur_line_len++);
+
+		for (y = 0; y < FONT_HEIGHT; y++)
+		{
+			pad_x = ((int)w.ws_col - cur_line_len * FONT_WIDTH) / 2;
+			rest_x = (int)w.ws_col - pad_x - cur_line_len * FONT_WIDTH;
+
+			for (x = 0; x < pad_x; x++)
+				putchar(' ');
+			for (p = line_p; *p && *p != '\n'; p++)
+				render_glyph_row(*p, y, attrs);
+			for (x = 0; x < rest_x; x++)
+				putchar(' ');
+		}
+		for (y = 0; y < LINE_SPACING; y++)
+			for (x = 0; x < w.ws_col; x++)
+				putchar(' ');
+	}
+	for (y = 0; y < rest_y; y++)
+		for (x = 0; x < w.ws_col; x++)
+			putchar(' ');
+	fflush(stdout);
 }
 
 void
