@@ -163,7 +163,7 @@ render_glyph_row(char c, int row, char *attrs)
 	}
 
 	for (i = 0; i < FONT_CHARACTERS && font[i][0] != c; i++);
-	stripe = font[i][row + 1];
+	stripe = (i == FONT_CHARACTERS ? 0xFF : font[i][row + 1]);
 
 	for (i = FONT_WIDTH - 1; i >= 0; i--)
 		if (stripe & (1 << i))
