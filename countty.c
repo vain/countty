@@ -166,8 +166,8 @@ render_lines(char *buf, char *attrs)
 			num_lines++;
 
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-	pad_y = ((int)w.ws_row - (FONT_HEIGHT + LINE_SPACING) * num_lines) / 2;
-	rest_y = (int)w.ws_row - pad_y - (FONT_HEIGHT + LINE_SPACING) * num_lines;
+	pad_y = (w.ws_row - (FONT_HEIGHT + LINE_SPACING) * num_lines) / 2;
+	rest_y = w.ws_row - pad_y - (FONT_HEIGHT + LINE_SPACING) * num_lines;
 
 	fputs("\033[H", stdout);
 	for (y = 0; y < pad_y; y++)
@@ -179,8 +179,8 @@ render_lines(char *buf, char *attrs)
 
 		for (y = 0; y < FONT_HEIGHT; y++)
 		{
-			pad_x = ((int)w.ws_col - cur_line_len * FONT_WIDTH) / 2;
-			rest_x = (int)w.ws_col - pad_x - cur_line_len * FONT_WIDTH;
+			pad_x = (w.ws_col - cur_line_len * FONT_WIDTH) / 2;
+			rest_x = w.ws_col - pad_x - cur_line_len * FONT_WIDTH;
 
 			for (x = 0; x < pad_x; x++)
 				putchar(' ');
