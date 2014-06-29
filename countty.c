@@ -23,7 +23,7 @@ static void wait_for_next_second(long int);
 
 #define FONT_HEIGHT 7
 #define FONT_WIDTH 8
-#define FONT_CHARACTERS 13
+#define FONT_CHARACTERS 14
 
 static unsigned char font[][FONT_CHARACTERS] = {
 	/* Line by line, top to bottom, least significant bit is the
@@ -39,6 +39,7 @@ static unsigned char font[][FONT_CHARACTERS] = {
 	{ '8', 0x3C, 0x42, 0x42, 0x3C, 0x42, 0x42, 0x3C },
 	{ '9', 0x3C, 0x42, 0x42, 0x3C, 0x02, 0x02, 0x3C },
 	{ 'd', 0x00, 0x02, 0x02, 0x3C, 0x42, 0x42, 0x3C },
+	{ 'y', 0x00, 0x00, 0x42, 0x3C, 0x02, 0x02, 0x0C },
 	{ ':', 0x00, 0x00, 0x18, 0x00, 0x18, 0x00, 0x00 },
 	{ ' ', 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
 };
@@ -104,9 +105,11 @@ void
 render_duration(long int s, int critical)
 {
 	long int sm = s;
-	int days, hours, minutes, seconds;
+	int years, days, hours, minutes, seconds;
 	char buf[32] = "";
 
+	years = sm / 31557600;
+	sm %= 31557600;
 	days = sm / 86400;
 	sm %= 86400;
 	hours = sm / 3600;
@@ -114,7 +117,10 @@ render_duration(long int s, int critical)
 	minutes = sm / 60;
 	seconds = sm % 60;
 
-	if (days > 0)
+	if (years > 0)
+		snprintf(buf, 32, "%dy %dd\n%02d:%02d:%02d\n", years, days, hours,
+		                                               minutes, seconds);
+	else if (days > 0)
 		snprintf(buf, 32, "%dd\n%02d:%02d:%02d\n", days, hours, minutes, seconds);
 	else if (hours > 0)
 		snprintf(buf, 32, "%02d:%02d:%02d\n", hours, minutes, seconds);
