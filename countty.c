@@ -12,7 +12,6 @@ static int countdown(long int, int);
 static void countup(long int *, long int *);
 static void full_color(int *);
 static void render_duration(long int, int);
-static void render_glyph_row(char, int, char *);
 static void render_lines(char *, char *);
 static void restore_cursor(void);
 static void restore_cursor_and_quit(int);
@@ -133,33 +132,12 @@ render_duration(long int s, int critical)
 }
 
 void
-render_glyph_row(char c, int row, char *attrs)
-{
-	int i;
-	unsigned char stripe = 0;
-
-	if (row >= FONT_HEIGHT)
-	{
-		fprintf(stderr, "Error: row >= FONT_HEIGHT\n");
-		exit(EXIT_FAILURE);
-	}
-
-	for (i = 0; i < FONT_CHARACTERS && font[i][0] != c; i++);
-	stripe = (i == FONT_CHARACTERS ? 0xFF : font[i][row + 1]);
-
-	for (i = FONT_WIDTH - 1; i >= 0; i--)
-		if (stripe & (1 << i))
-			printf("\033[7%sm \033[0m", attrs);
-		else
-			putchar(' ');
-}
-
-void
 render_lines(char *buf, char *attrs)
 {
 	struct winsize w;
-	int line, cur_line_len, x, y, pad_x, pad_y, rest_x, rest_y, num_lines;
+	int line, cur_line_len, i, x, y, pad_x, pad_y, rest_x, rest_y, num_lines;
 	char *p, *line_p;
+	unsigned char stripe;
 
 	for (num_lines = 0, p = buf; *p; p++)
 		if (*p == '\n')
@@ -185,7 +163,16 @@ render_lines(char *buf, char *attrs)
 			for (x = 0; x < pad_x; x++)
 				putchar(' ');
 			for (p = line_p; *p && *p != '\n'; p++)
-				render_glyph_row(*p, y, attrs);
+			{
+				for (i = 0; i < FONT_CHARACTERS && font[i][0] != *p; i++);
+				stripe = (i == FONT_CHARACTERS ? 0xFF : font[i][y + 1]);
+
+				for (i = FONT_WIDTH - 1; i >= 0; i--)
+					if (stripe & (1 << i))
+						printf("\033[7%sm \033[0m", attrs);
+					else
+						putchar(' ');
+			}
 			for (x = 0; x < rest_x; x++)
 				putchar(' ');
 		}
