@@ -118,16 +118,17 @@ render_duration(long int s, int critical, int hide_seconds)
 	seconds = sm % 60;
 
 	if (years > 0)
-		snprintf(buf, 32, "%dy %dd\n%02d:%02d:%02d\n", years, days, hours,
-		                                               minutes, seconds);
+		snprintf(buf, sizeof buf, "%dy %dd\n%02d:%02d:%02d\n", years, days, hours,
+		                                                       minutes, seconds);
 	else if (days > 0)
-		snprintf(buf, 32, "%dd\n%02d:%02d:%02d\n", days, hours, minutes, seconds);
+		snprintf(buf, sizeof buf, "%dd\n%02d:%02d:%02d\n", days, hours, minutes,
+		                                                   seconds);
 	else if (hours > 0)
-		snprintf(buf, 32, "%02d:%02d:%02d\n", hours, minutes, seconds);
+		snprintf(buf, sizeof buf, "%02d:%02d:%02d\n", hours, minutes, seconds);
 	else if (minutes > 0)
-		snprintf(buf, 32, "%02d:%02d\n", minutes, seconds);
+		snprintf(buf, sizeof buf, "%02d:%02d\n", minutes, seconds);
 	else
-		snprintf(buf, 32, "%02d\n", seconds);
+		snprintf(buf, sizeof buf, "%02d\n", seconds);
 
 	if (hide_seconds && strlen(buf) > 3 && !(critical > 0 && s <= critical))
 	{
