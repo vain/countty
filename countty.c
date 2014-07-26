@@ -8,10 +8,10 @@
 #include <unistd.h>
 
 
-static int countdown(long int, int);
-static void countup(long int *, long int *);
+static int countdown(long int, int, int);
+static void countup(long int *, long int *, int);
 static void full_color(int *);
-static void render_duration(long int, int);
+static void render_duration(long int, int, int);
 static void render_lines(char *, char *);
 static void restore_cursor(void);
 static void restore_cursor_and_quit(int);
@@ -45,7 +45,7 @@ static unsigned char font[][FONT_CHARACTERS] = {
 
 
 int
-countdown(long int target, int critical)
+countdown(long int target, int critical, int hide_seconds)
 {
 	struct timeval tv;
 	long int diff;
@@ -60,12 +60,12 @@ countdown(long int target, int critical)
 	if (diff <= 0)
 		return 1;
 
-	render_duration(diff, critical);
+	render_duration(diff, critical, hide_seconds);
 	return 0;
 }
 
 void
-countup(long int *ref, long int *sync_fraction)
+countup(long int *ref, long int *sync_fraction, int hide_seconds)
 {
 	struct timeval tv;
 
@@ -81,7 +81,7 @@ countup(long int *ref, long int *sync_fraction)
 	if (*sync_fraction == 0)
 		*sync_fraction = tv.tv_usec * 1e3;
 
-	render_duration(tv.tv_sec - *ref, -1);
+	render_duration(tv.tv_sec - *ref, -1, hide_seconds);
 }
 
 void
@@ -101,10 +101,11 @@ full_color(int *blink)
 }
 
 void
-render_duration(long int s, int critical)
+render_duration(long int s, int critical, int hide_seconds)
 {
 	long int sm = s;
 	int years, days, hours, minutes, seconds;
+	size_t l;
 	char buf[32] = "";
 
 	years = sm / 31557600;
@@ -127,6 +128,13 @@ render_duration(long int s, int critical)
 		snprintf(buf, 32, "%02d:%02d\n", minutes, seconds);
 	else
 		snprintf(buf, 32, "%02d\n", seconds);
+
+	if (hide_seconds && strlen(buf) > 3 && !(critical > 0 && s <= critical))
+	{
+		l = strlen(buf);
+		buf[l - 4] = '\n';
+		buf[l - 3] = '\0';
+	}
 
 	render_lines(buf, (critical > 0 && s <= critical ? "7;1;31" : "7"));
 }
@@ -227,13 +235,13 @@ main(int argc, char **argv)
 	long int target = 0;
 	long int start = 0;
 	long int sync_fraction = 0;
-	int critical = 10, blink = 0, opt;
+	int critical = 10, blink = 0, hide_seconds = 0, opt;
 
 	atexit(restore_cursor);
 	signal(SIGINT, restore_cursor_and_quit);
 	fputs("\033[?25l", stdout);
 
-	while ((opt = getopt(argc, argv, "b:c:t:")) != -1)
+	while ((opt = getopt(argc, argv, "b:c:St:")) != -1)
 	{
 		switch (opt)
 		{
@@ -242,6 +250,9 @@ main(int argc, char **argv)
 				break;
 			case 'c':
 				critical = atoi(optarg);
+				break;
+			case 'S':
+				hide_seconds = 1;
 				break;
 			case 't':
 				target = atol(optarg);
@@ -255,7 +266,7 @@ main(int argc, char **argv)
 	{
 		if (target != 0)
 		{
-			if (countdown(target, critical))
+			if (countdown(target, critical, hide_seconds))
 			{
 				if (blink == 0)
 					exit(EXIT_SUCCESS);
@@ -264,7 +275,7 @@ main(int argc, char **argv)
 			}
 		}
 		else
-			countup(&start, &sync_fraction);
+			countup(&start, &sync_fraction, hide_seconds);
 		wait_for_next_second(sync_fraction);
 	}
 

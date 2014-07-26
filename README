@@ -9,7 +9,7 @@ POSIX OS and a VT-ish color terminal.
 
 Usage:
 
-    countty [-t <timestamp> [-b <n>] [-c <s>]]
+    countty [-t <timestamp> [-b <n>] [-c <s>]] [-S]
 
         No options make countty count upwards.
 
@@ -21,6 +21,10 @@ Usage:
 
         With "-c <s>", when the countdown reaches the last s seconds, the
         display will turn red. Defaults to 10 seconds.
+
+        With "-S", countty omits seconds as long as you're outside the critical
+        period and as long as the value to be displayed is larger than 59
+        seconds.
 
     You should combine countty with GNU date, figlet or other tools:
 
