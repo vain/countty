@@ -1,37 +1,60 @@
-
-                                    =======
-                                    countty
-                                    =======
+countty(1)                       User Commands                      countty(1)
 
 
-countty is termdown[1] for minimalists. It has no dependencies except for a
-POSIX OS and a VT-ish color terminal.
 
-Usage:
+NAME
+       countty - a counter for your terminal
 
-    countty [-t <timestamp> [-b <n>] [-c <s>]] [-S]
+SYNOPSIS
+       countty [-t timestamp [-b n] [-c s]] [-S]
 
-        No options make countty count upwards.
+DESCRIPTION
+       The  job  of  countty is to count upwards or downwards. It will display
+       the time using big LCD-like digits.
 
-        "-t <timestamp>" creates a countdown that ends at the specified time.
+       countty is termdown  ⟨https://github.com/trehn/termdown⟩  for  minimal‐
+       ists.  It  has no dependencies except for a POSIX OS and a VT-ish color
+       terminal.
 
-        "-b <n>" makes the screen blink n seconds in red once the countdown has
-        finished. If n is -1, the screen will blink about 4 * INT_MAX seconds
-        (i.e., "forever").
+OPTIONS
+       No options make countty count upwards.
 
-        With "-c <s>", when the countdown reaches the last s seconds, the
-        display will turn red. Defaults to 10 seconds.
+       -t timestamp
+              Create a countdown that ends at the specified time.
 
-        With "-S", countty omits seconds as long as you're outside the critical
-        period and as long as the value to be displayed is larger than 59
-        seconds.
+       -b n   Make the screen blink n seconds in red once  the  countdown  has
+              finished.  If  n  is -1, the screen will blink about 4 * INT_MAX
+              seconds (i.e., “forever”).
 
-    You should combine countty with GNU date, figlet or other tools:
+       -c s   When the countdown reaches the last s seconds, the display  will
+              turn red. Defaults to 10 seconds.
 
-        countty -t $(date -d '2014-12-24 20:00' +%s)
-        countty -t $(date -d 'now + 10 seconds' +%s)
-        countty -t $(date -d 'tomorrow 12:00' +%s)
-        countty -t $(date -d '...' +%s); clear; figlet -tc <<<'PARTY'
+       -S     When  -S  is  specified, countty omits seconds as long as you're
+              outside the critical period and as long as the value to be  dis‐
+              played is larger than 59 seconds.
+
+EXIT STATUS
+       When a countdown has been aborted in some way (e.g., when you send SIG‐
+       INT to the process), countty will exit with a status code other than 0.
+
+EXAMPLE
+       You should combine countty with date(1), figlet(6), or other tools:
+
+       countty -t $(date -d '2014-12-24 20:00' +%s)
+       countty -t $(date -d 'now + 10 seconds' +%s)
+       countty -t $(date -d 'tomorrow 12:00' +%s)
+       countty -t $(date -d '...' +%s); clear; figlet -tc <<<'PARTY'
+
+LICENSE
+       countty is released as “PIZZA-WARE”. See the accompanying LICENSE file.
+
+HISTORY
+       countty was originally  written  by  Peter  Hofmann.  The  project  was
+       started in June 2014.
+
+SEE ALSO
+       date(1), figlet(6).
 
 
-[1] https://github.com/trehn/termdown
+
+countty                           2015-07-26                        countty(1)

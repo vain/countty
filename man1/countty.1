@@ -1,0 +1,69 @@
+.TH countty 1 "2015-07-26" "countty" "User Commands"
+.\" --------------------------------------------------------------------
+.SH NAME
+countty \- a counter for your terminal
+.\" --------------------------------------------------------------------
+.SH SYNOPSIS
+\fBcountty\fP [\fB\-t\fP \fItimestamp\fP [\fB\-b\fP \fIn\fP]
+[\fB\-c\fP \fIs\fP]] [\fB\-S\fP]
+.\" --------------------------------------------------------------------
+.SH DESCRIPTION
+The job of \fBcountty\fP is to count upwards or downwards. It will
+display the time using big LCD-like digits.
+.P
+\fBcountty\fP is
+.UR https://\:github.com/\:trehn/\:termdown
+\fBtermdown\fP
+.UE
+for minimalists. It has no dependencies except for a POSIX OS and a
+VT-ish color terminal.
+.\" --------------------------------------------------------------------
+.SH OPTIONS
+No options make \fBcountty\fP count upwards.
+.TP
+\fB\-t\fP \fItimestamp\fP
+Create a countdown that ends at the specified time.
+.TP
+\fB\-b\fP \fIn\fP
+Make the screen blink \fIn\fP seconds in red once the countdown has
+finished. If \fIn\fP is \fB-1\fP, the screen will blink about \fB4 *
+INT_MAX\fP seconds (i.e., \(lqforever\(rq).
+.TP
+\fB\-c\fP \fIs\fP
+When the countdown reaches the last \fIs\fP seconds, the display will
+turn red. Defaults to \fB10\fP seconds.
+.TP
+\fB\-S\fP
+When \fB\-S\fP is specified, \fBcountty\fP omits seconds as long as
+you're outside the critical period and as long as the value to be
+displayed is larger than 59 seconds.
+.\" --------------------------------------------------------------------
+.SH "EXIT STATUS"
+When a countdown has been aborted in some way (e.g., when you send
+\fBSIGINT\fP to the process), \fBcountty\fP will exit with a status code
+other than 0.
+.\" --------------------------------------------------------------------
+.SH EXAMPLE
+You should combine countty with \fBdate\fP(1), \fBfiglet\fP(6), or other
+tools:
+.P
+.nf
+\f(CW
+countty -t $(date -d '2014-12-24 20:00' +%s)
+countty -t $(date -d 'now + 10 seconds' +%s)
+countty -t $(date -d 'tomorrow 12:00' +%s)
+countty -t $(date -d '...' +%s); clear; figlet -tc <<<'PARTY'
+\fP
+.fi
+.\" --------------------------------------------------------------------
+.SH LICENSE
+\fBcountty\fP is released as \(lqPIZZA-WARE\(rq. See the accompanying
+\fILICENSE\fP file.
+.\" --------------------------------------------------------------------
+.SH HISTORY
+\fBcountty\fP was originally written by Peter Hofmann. The project
+was started in June 2014.
+.\" --------------------------------------------------------------------
+.SH "SEE ALSO"
+.BR date (1),
+.BR figlet (6).
