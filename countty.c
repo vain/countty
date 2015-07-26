@@ -205,7 +205,7 @@ restore_cursor_and_quit(int sig)
 {
 	restore_cursor();
 	putchar('\n');
-	exit(EXIT_SUCCESS);
+	exit(EXIT_FAILURE);
 }
 
 void
