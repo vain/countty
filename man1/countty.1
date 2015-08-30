@@ -1,4 +1,4 @@
-.TH countty 1 "2015-07-26" "countty" "User Commands"
+.TH countty 1 "2015-08-30" "countty" "User Commands"
 .\" --------------------------------------------------------------------
 .SH NAME
 countty \- a counter for your terminal
@@ -8,15 +8,8 @@ countty \- a counter for your terminal
 [\fB\-c\fP \fIs\fP]] [\fB\-S\fP]
 .\" --------------------------------------------------------------------
 .SH DESCRIPTION
-The job of \fBcountty\fP is to count upwards or downwards. It will
-display the time using big LCD-like digits.
-.P
-\fBcountty\fP is
-.UR https://\:github.com/\:trehn/\:termdown
-\fBtermdown\fP
-.UE
-for minimalists. It has no dependencies except for a POSIX OS and a
-VT-ish color terminal.
+\fBcountty\fP is like a simple stopwatch for your terminal. The elapsed
+or remaining time will be displayed in big LCD-like digits.
 .\" --------------------------------------------------------------------
 .SH OPTIONS
 No options make \fBcountty\fP count upwards.
@@ -62,7 +55,11 @@ countty -t $(date -d '...' +%s); clear; figlet -tc <<<'PARTY'
 .\" --------------------------------------------------------------------
 .SH HISTORY
 \fBcountty\fP was originally written by Peter Hofmann. The project
-was started in June 2014.
+was started in June 2014 as a more minimalistic version of
+.UR https://\:github.com/\:trehn/\:termdown
+\fBtermdown\fP
+.UE
+\&.
 .\" --------------------------------------------------------------------
 .SH "SEE ALSO"
 .BR date (1),
