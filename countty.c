@@ -14,7 +14,7 @@ static void full_color(int *);
 static void render_duration(long int, int, int);
 static void render_lines(char *, char *);
 static void restore_cursor(void);
-static void restore_cursor_and_quit(int);
+static void sigint(int);
 static void wait_for_next_second(long int);
 
 
@@ -42,6 +42,8 @@ static unsigned char font[][FONT_CHARACTERS] = {
 	{ ':', 0x00, 0x00, 0x18, 0x00, 0x18, 0x00, 0x00 },
 	{ ' ', 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
 };
+
+static char running = 1;
 
 
 int
@@ -197,15 +199,15 @@ render_lines(char *buf, char *attrs)
 void
 restore_cursor(void)
 {
-	fputs("\033[?25h", stdout);
+	fputs("\033[?25h\n", stdout);
 }
 
 void
-restore_cursor_and_quit(int sig)
+sigint(int sig)
 {
-	restore_cursor();
-	putchar('\n');
-	exit(EXIT_FAILURE);
+	(void)sig;
+
+	running = 0;
 }
 
 void
@@ -239,7 +241,7 @@ main(int argc, char **argv)
 	int critical = 10, blink = 0, hide_seconds = 0, opt;
 
 	atexit(restore_cursor);
-	signal(SIGINT, restore_cursor_and_quit);
+	signal(SIGINT, sigint);
 	fputs("\033[?25l", stdout);
 
 	while ((opt = getopt(argc, argv, "b:c:St:")) != -1)
@@ -263,7 +265,7 @@ main(int argc, char **argv)
 		}
 	}
 
-	while (1)
+	while (running)
 	{
 		if (target != 0)
 		{
@@ -280,5 +282,5 @@ main(int argc, char **argv)
 		wait_for_next_second(sync_fraction);
 	}
 
-	/* not reached */
+	exit(EXIT_SUCCESS);
 }
