@@ -25,22 +25,22 @@ static void wait_for_next_second(long int);
 #define FONT_CHARACTERS 14
 
 static unsigned char font[][FONT_CHARACTERS] = {
-	/* Line by line, top to bottom, least significant bit is the
-	 * right-most character: 0x3D = 0b00111101 = "  xxxx x". */
-	{ '0', 0x3C, 0x42, 0x42, 0x00, 0x42, 0x42, 0x3C },
-	{ '1', 0x00, 0x02, 0x02, 0x00, 0x02, 0x02, 0x00 },
-	{ '2', 0x3C, 0x02, 0x02, 0x3C, 0x40, 0x40, 0x3C },
-	{ '3', 0x3C, 0x02, 0x02, 0x3C, 0x02, 0x02, 0x3C },
-	{ '4', 0x00, 0x42, 0x42, 0x3C, 0x02, 0x02, 0x00 },
-	{ '5', 0x3C, 0x40, 0x40, 0x3C, 0x02, 0x02, 0x3C },
-	{ '6', 0x3C, 0x40, 0x40, 0x3C, 0x42, 0x42, 0x3C },
-	{ '7', 0x3C, 0x02, 0x02, 0x00, 0x02, 0x02, 0x00 },
-	{ '8', 0x3C, 0x42, 0x42, 0x3C, 0x42, 0x42, 0x3C },
-	{ '9', 0x3C, 0x42, 0x42, 0x3C, 0x02, 0x02, 0x3C },
-	{ 'd', 0x00, 0x02, 0x02, 0x3C, 0x42, 0x42, 0x3C },
-	{ 'y', 0x00, 0x00, 0x42, 0x3C, 0x02, 0x02, 0x0C },
-	{ ':', 0x00, 0x00, 0x18, 0x00, 0x18, 0x00, 0x00 },
-	{ ' ', 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
+    /* Line by line, top to bottom, least significant bit is the
+     * right-most character: 0x3D = 0b00111101 = "  xxxx x". */
+    { '0', 0x3C, 0x42, 0x42, 0x00, 0x42, 0x42, 0x3C },
+    { '1', 0x00, 0x02, 0x02, 0x00, 0x02, 0x02, 0x00 },
+    { '2', 0x3C, 0x02, 0x02, 0x3C, 0x40, 0x40, 0x3C },
+    { '3', 0x3C, 0x02, 0x02, 0x3C, 0x02, 0x02, 0x3C },
+    { '4', 0x00, 0x42, 0x42, 0x3C, 0x02, 0x02, 0x00 },
+    { '5', 0x3C, 0x40, 0x40, 0x3C, 0x02, 0x02, 0x3C },
+    { '6', 0x3C, 0x40, 0x40, 0x3C, 0x42, 0x42, 0x3C },
+    { '7', 0x3C, 0x02, 0x02, 0x00, 0x02, 0x02, 0x00 },
+    { '8', 0x3C, 0x42, 0x42, 0x3C, 0x42, 0x42, 0x3C },
+    { '9', 0x3C, 0x42, 0x42, 0x3C, 0x02, 0x02, 0x3C },
+    { 'd', 0x00, 0x02, 0x02, 0x3C, 0x42, 0x42, 0x3C },
+    { 'y', 0x00, 0x00, 0x42, 0x3C, 0x02, 0x02, 0x0C },
+    { ':', 0x00, 0x00, 0x18, 0x00, 0x18, 0x00, 0x00 },
+    { ' ', 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
 };
 
 static char running = 1;
@@ -49,238 +49,238 @@ static char running = 1;
 int
 countdown(long int target, int critical, int hide_seconds)
 {
-	struct timeval tv;
-	long int diff;
+    struct timeval tv;
+    long int diff;
 
-	if (gettimeofday(&tv, NULL) == -1)
-	{
-		perror("gettimeofday");
-		exit(EXIT_FAILURE);
-	}
+    if (gettimeofday(&tv, NULL) == -1)
+    {
+        perror("gettimeofday");
+        exit(EXIT_FAILURE);
+    }
 
-	diff = target - tv.tv_sec;
-	if (diff <= 0)
-		return 1;
+    diff = target - tv.tv_sec;
+    if (diff <= 0)
+        return 1;
 
-	render_duration(diff, critical, hide_seconds);
-	return 0;
+    render_duration(diff, critical, hide_seconds);
+    return 0;
 }
 
 void
 countup(long int *ref, long int *sync_fraction, int hide_seconds)
 {
-	struct timeval tv;
+    struct timeval tv;
 
-	if (gettimeofday(&tv, NULL) == -1)
-	{
-		perror("gettimeofday");
-		exit(EXIT_FAILURE);
-	}
+    if (gettimeofday(&tv, NULL) == -1)
+    {
+        perror("gettimeofday");
+        exit(EXIT_FAILURE);
+    }
 
-	if (*ref == 0)
-		*ref = tv.tv_sec;
+    if (*ref == 0)
+        *ref = tv.tv_sec;
 
-	if (*sync_fraction == 0)
-		*sync_fraction = tv.tv_usec * 1e3;
+    if (*sync_fraction == 0)
+        *sync_fraction = tv.tv_usec * 1e3;
 
-	render_duration(tv.tv_sec - *ref, -1, hide_seconds);
+    render_duration(tv.tv_sec - *ref, -1, hide_seconds);
 }
 
 void
 full_color(int *blink)
 {
-	int x, y;
-	struct winsize w;
+    int x, y;
+    struct winsize w;
 
-	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-	fputs("\033[H", stdout);
-	fputs(*blink % 2 ? "\033[0m" : "\033[7;1;31m", stdout);
-	for (y = 0; y < w.ws_row; y++)
-		for (x = 0; x < w.ws_col; x++)
-			putchar(' ');
-	fflush(stdout);
-	(*blink)--;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    fputs("\033[H", stdout);
+    fputs(*blink % 2 ? "\033[0m" : "\033[7;1;31m", stdout);
+    for (y = 0; y < w.ws_row; y++)
+        for (x = 0; x < w.ws_col; x++)
+            putchar(' ');
+    fflush(stdout);
+    (*blink)--;
 }
 
 void
 render_duration(long int s, int critical, int hide_seconds)
 {
-	long int sm = s;
-	int years, days, hours, minutes, seconds;
-	size_t l;
-	char buf[32] = "";
+    long int sm = s;
+    int years, days, hours, minutes, seconds;
+    size_t l;
+    char buf[32] = "";
 
-	years = sm / 31557600;
-	sm %= 31557600;
-	days = sm / 86400;
-	sm %= 86400;
-	hours = sm / 3600;
-	sm %= 3600;
-	minutes = sm / 60;
-	seconds = sm % 60;
+    years = sm / 31557600;
+    sm %= 31557600;
+    days = sm / 86400;
+    sm %= 86400;
+    hours = sm / 3600;
+    sm %= 3600;
+    minutes = sm / 60;
+    seconds = sm % 60;
 
-	if (years > 0)
-		snprintf(buf, sizeof buf, "%dy %dd\n%02d:%02d:%02d\n", years, days, hours,
-		                                                       minutes, seconds);
-	else if (days > 0)
-		snprintf(buf, sizeof buf, "%dd\n%02d:%02d:%02d\n", days, hours, minutes,
-		                                                   seconds);
-	else if (hours > 0)
-		snprintf(buf, sizeof buf, "%02d:%02d:%02d\n", hours, minutes, seconds);
-	else if (minutes > 0)
-		snprintf(buf, sizeof buf, "%02d:%02d\n", minutes, seconds);
-	else
-		snprintf(buf, sizeof buf, "%02d\n", seconds);
+    if (years > 0)
+        snprintf(buf, sizeof buf, "%dy %dd\n%02d:%02d:%02d\n", years, days, hours,
+                                                               minutes, seconds);
+    else if (days > 0)
+        snprintf(buf, sizeof buf, "%dd\n%02d:%02d:%02d\n", days, hours, minutes,
+                                                           seconds);
+    else if (hours > 0)
+        snprintf(buf, sizeof buf, "%02d:%02d:%02d\n", hours, minutes, seconds);
+    else if (minutes > 0)
+        snprintf(buf, sizeof buf, "%02d:%02d\n", minutes, seconds);
+    else
+        snprintf(buf, sizeof buf, "%02d\n", seconds);
 
-	if (hide_seconds && strlen(buf) > 3 && !(critical > 0 && s <= critical))
-	{
-		l = strlen(buf);
-		buf[l - 4] = '\n';
-		buf[l - 3] = '\0';
-	}
+    if (hide_seconds && strlen(buf) > 3 && !(critical > 0 && s <= critical))
+    {
+        l = strlen(buf);
+        buf[l - 4] = '\n';
+        buf[l - 3] = '\0';
+    }
 
-	render_lines(buf, (critical > 0 && s <= critical ? "7;1;31" : "7"));
+    render_lines(buf, (critical > 0 && s <= critical ? "7;1;31" : "7"));
 }
 
 void
 render_lines(char *buf, char *attrs)
 {
-	struct winsize w;
-	int line, cur_line_len, i, x, y, pad_x, pad_y, rest_x, rest_y, num_lines;
-	char *p, *line_p;
-	unsigned char stripe;
+    struct winsize w;
+    int line, cur_line_len, i, x, y, pad_x, pad_y, rest_x, rest_y, num_lines;
+    char *p, *line_p;
+    unsigned char stripe;
 
-	for (num_lines = 0, p = buf; *p; p++)
-		if (*p == '\n')
-			num_lines++;
+    for (num_lines = 0, p = buf; *p; p++)
+        if (*p == '\n')
+            num_lines++;
 
-	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-	pad_y = (w.ws_row - (FONT_HEIGHT + LINE_SPACING) * num_lines) / 2;
-	rest_y = w.ws_row - pad_y - (FONT_HEIGHT + LINE_SPACING) * num_lines;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    pad_y = (w.ws_row - (FONT_HEIGHT + LINE_SPACING) * num_lines) / 2;
+    rest_y = w.ws_row - pad_y - (FONT_HEIGHT + LINE_SPACING) * num_lines;
 
-	fputs("\033[H", stdout);
-	for (y = 0; y < pad_y; y++)
-		for (x = 0; x < w.ws_col; x++)
-			putchar(' ');
-	for (line = 0, line_p = buf; line < num_lines; line++, line_p = ++p)
-	{
-		for (cur_line_len = 0, p = line_p; *p != '\n'; p++, cur_line_len++);
-		pad_x = (w.ws_col - cur_line_len * FONT_WIDTH) / 2;
-		rest_x = w.ws_col - pad_x - cur_line_len * FONT_WIDTH;
+    fputs("\033[H", stdout);
+    for (y = 0; y < pad_y; y++)
+        for (x = 0; x < w.ws_col; x++)
+            putchar(' ');
+    for (line = 0, line_p = buf; line < num_lines; line++, line_p = ++p)
+    {
+        for (cur_line_len = 0, p = line_p; *p != '\n'; p++, cur_line_len++);
+        pad_x = (w.ws_col - cur_line_len * FONT_WIDTH) / 2;
+        rest_x = w.ws_col - pad_x - cur_line_len * FONT_WIDTH;
 
-		for (y = 0; y < FONT_HEIGHT; y++)
-		{
-			for (x = 0; x < pad_x; x++)
-				putchar(' ');
-			for (p = line_p; *p != '\n'; p++)
-			{
-				for (i = 0; i < FONT_CHARACTERS && font[i][0] != *p; i++);
-				stripe = (i == FONT_CHARACTERS ? 0xFF : font[i][y + 1]);
+        for (y = 0; y < FONT_HEIGHT; y++)
+        {
+            for (x = 0; x < pad_x; x++)
+                putchar(' ');
+            for (p = line_p; *p != '\n'; p++)
+            {
+                for (i = 0; i < FONT_CHARACTERS && font[i][0] != *p; i++);
+                stripe = (i == FONT_CHARACTERS ? 0xFF : font[i][y + 1]);
 
-				for (i = FONT_WIDTH - 1; i >= 0; i--)
-					if (stripe & (1 << i))
-						printf("\033[%sm \033[0m", attrs);
-					else
-						putchar(' ');
-			}
-			for (x = 0; x < rest_x; x++)
-				putchar(' ');
-		}
-		for (y = 0; y < LINE_SPACING; y++)
-			for (x = 0; x < w.ws_col; x++)
-				putchar(' ');
-	}
-	for (y = 0; y < rest_y; y++)
-		for (x = 0; x < w.ws_col; x++)
-			putchar(' ');
-	fflush(stdout);
+                for (i = FONT_WIDTH - 1; i >= 0; i--)
+                    if (stripe & (1 << i))
+                        printf("\033[%sm \033[0m", attrs);
+                    else
+                        putchar(' ');
+            }
+            for (x = 0; x < rest_x; x++)
+                putchar(' ');
+        }
+        for (y = 0; y < LINE_SPACING; y++)
+            for (x = 0; x < w.ws_col; x++)
+                putchar(' ');
+    }
+    for (y = 0; y < rest_y; y++)
+        for (x = 0; x < w.ws_col; x++)
+            putchar(' ');
+    fflush(stdout);
 }
 
 void
 restore_cursor(void)
 {
-	fputs("\033[?25h\n", stdout);
+    fputs("\033[?25h\n", stdout);
 }
 
 void
 sigint(int sig)
 {
-	(void)sig;
+    (void)sig;
 
-	running = 0;
+    running = 0;
 }
 
 void
 wait_for_next_second(long int sync_fraction)
 {
-	struct timeval tv;
-	struct timespec ts;
+    struct timeval tv;
+    struct timespec ts;
 
-	if (gettimeofday(&tv, NULL) == -1)
-	{
-		perror("gettimeofday");
-		exit(EXIT_FAILURE);
-	}
+    if (gettimeofday(&tv, NULL) == -1)
+    {
+        perror("gettimeofday");
+        exit(EXIT_FAILURE);
+    }
 
-	ts.tv_sec = 0;
-	ts.tv_nsec = 1e9 - tv.tv_usec * 1e3 + sync_fraction;
-	if (ts.tv_nsec >= 1e9)
-	{
-		ts.tv_sec = 1;
-		ts.tv_nsec -= 1e9;
-	}
-	nanosleep(&ts, NULL);
+    ts.tv_sec = 0;
+    ts.tv_nsec = 1e9 - tv.tv_usec * 1e3 + sync_fraction;
+    if (ts.tv_nsec >= 1e9)
+    {
+        ts.tv_sec = 1;
+        ts.tv_nsec -= 1e9;
+    }
+    nanosleep(&ts, NULL);
 }
 
 int
 main(int argc, char **argv)
 {
-	long int target = 0;
-	long int start = 0;
-	long int sync_fraction = 0;
-	int critical = 10, blink = 0, hide_seconds = 0, opt;
+    long int target = 0;
+    long int start = 0;
+    long int sync_fraction = 0;
+    int critical = 10, blink = 0, hide_seconds = 0, opt;
 
-	atexit(restore_cursor);
-	signal(SIGINT, sigint);
-	fputs("\033[?25l", stdout);
+    atexit(restore_cursor);
+    signal(SIGINT, sigint);
+    fputs("\033[?25l", stdout);
 
-	while ((opt = getopt(argc, argv, "b:c:St:")) != -1)
-	{
-		switch (opt)
-		{
-			case 'b':
-				blink = 2 * atoi(optarg);
-				break;
-			case 'c':
-				critical = atoi(optarg);
-				break;
-			case 'S':
-				hide_seconds = 1;
-				break;
-			case 't':
-				target = atol(optarg);
-				break;
-			default:
-				exit(EXIT_FAILURE);
-		}
-	}
+    while ((opt = getopt(argc, argv, "b:c:St:")) != -1)
+    {
+        switch (opt)
+        {
+            case 'b':
+                blink = 2 * atoi(optarg);
+                break;
+            case 'c':
+                critical = atoi(optarg);
+                break;
+            case 'S':
+                hide_seconds = 1;
+                break;
+            case 't':
+                target = atol(optarg);
+                break;
+            default:
+                exit(EXIT_FAILURE);
+        }
+    }
 
-	while (running)
-	{
-		if (target != 0)
-		{
-			if (countdown(target, critical, hide_seconds))
-			{
-				if (blink == 0)
-					exit(EXIT_SUCCESS);
-				else
-					full_color(&blink);
-			}
-		}
-		else
-			countup(&start, &sync_fraction, hide_seconds);
-		wait_for_next_second(sync_fraction);
-	}
+    while (running)
+    {
+        if (target != 0)
+        {
+            if (countdown(target, critical, hide_seconds))
+            {
+                if (blink == 0)
+                    exit(EXIT_SUCCESS);
+                else
+                    full_color(&blink);
+            }
+        }
+        else
+            countup(&start, &sync_fraction, hide_seconds);
+        wait_for_next_second(sync_fraction);
+    }
 
-	exit(EXIT_SUCCESS);
+    exit(EXIT_SUCCESS);
 }
