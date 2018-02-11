@@ -207,7 +207,7 @@ sigint(int sig)
 {
     (void)sig;
 
-    running = 0;
+    running = -1;
 }
 
 void
@@ -265,7 +265,7 @@ main(int argc, char **argv)
         }
     }
 
-    while (running)
+    while (running > 0)
     {
         if (target != 0)
         {
@@ -282,5 +282,5 @@ main(int argc, char **argv)
         wait_for_next_second(sync_fraction);
     }
 
-    exit(EXIT_SUCCESS);
+    exit(running);
 }
