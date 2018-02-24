@@ -1,6 +1,6 @@
 Release history for countty
 
-next
+v18.02  2018-02-24
   [Fixed]
   - We now exit with a non-zero exit code on SIGINT. The manpage already
     said we would do this.
